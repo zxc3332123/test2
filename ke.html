@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>語法特訓：代號「可」</title>
+    <style>
+        :root {
+            --primary: #00f3ff;
+            --secondary: #7000ff;
+            --accent: #ff0055;
+            --bg-dark: #0b0d17;
+            --bg-panel: #15192b;
+            --text-main: #e0e6ed;
+            --font-tech: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(21, 25, 43, 0.9);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            border-radius: 10px;
+            padding: 2rem;
+            position: relative;
+            backdrop-filter: blur(10px);
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header UI */
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-family: var(--font-tech);
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 1rem;
+            font-family: var(--font-tech);
+            font-size: 0.9rem;
+        }
+
+        .status-item span {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Game Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Welcome Screen */
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-tech);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .btn-secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: #fff;
+            box-shadow: 0 0 15px var(--secondary);
+        }
+
+        /* Question Area */
+        .question-card {
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .question-type {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-family: var(--font-tech);
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        /* Options (Multiple Choice) */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-main);
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background: rgba(0, 243, 255, 0.1);
+        }
+
+        .option-btn.selected {
+            background: var(--primary);
+            color: var(--bg-dark);
+            font-weight: bold;
+        }
+
+        /* Drag/Sort Styles */
+        .sort-container {
+            width: 100%;
+        }
+
+        .drop-zone {
+            min-height: 60px;
+            border-bottom: 2px dashed var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            align-items: center;
+        }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .word-chip {
+            background: rgba(112, 0, 255, 0.2);
+            border: 1px solid var(--secondary);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .word-chip:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Fill in Blank Styles */
+        .fill-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 1.2rem;
+            text-align: center;
+            width: 100px;
+            margin: 0 5px;
+            outline: none;
+        }
+
+        /* Feedback Modal */
+        .feedback-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 13, 23, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+
+        .feedback-content {
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .feedback-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-family: var(--font-tech);
+        }
+
+        .correct { color: #00ff66; text-shadow: 0 0 10px #00ff66; }
+        .wrong { color: #ff0055; text-shadow: 0 0 10px #ff0055; }
+
+        .feedback-text {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+
+        /* Results */
+        .score-display {
+            font-size: 4rem;
+            color: var(--primary);
+            margin: 2rem 0;
+            font-family: var(--font-tech);
+        }
+
+        /* Animation */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .glitch-effect {
+            animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 1rem;
+            }
+            .question-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="hud-header">
+        <div class="title">GRAMMAR::KE</div>
+        <div class="status-bar">
+            <div class="status-item">題目: <span id="q-num">01/10</span></div>
+            <div class="status-item">能量: <span id="score">0</span>%</div>
+        </div>
+    </div>
+
+    <!-- Screen 1: Welcome -->
+    <div id="screen-welcome" class="screen active">
+        <h1 style="color: var(--primary); margin-bottom: 1rem; text-shadow: 0 0 10px var(--primary);">語法同步程序</h1>
+        <div class="welcome-text">
+            <p>檢測到第 13-16 課的語言數據碎片。</p>
+            <p>任務目標：修復關於<strong>「可」</strong>的語法邏輯。</p>
+            <p style="color: var(--secondary); margin-top: 1rem;">
+                <small>說明：「可」用在動詞或形容詞前，表示強調語氣。</small><br>
+                <small>ex. 運動<strong>可</strong>重要了！(強調程度)</small>
+            </p>
+        </div>
+        <button class="btn" onclick="game.start()">啟動任務</button>
+    </div>
+
+    <!-- Screen 2: Game -->
+    <div id="screen-game" class="screen">
+        <div class="question-card">
+            <div class="question-type" id="q-type">Type Loading...</div>
+            <div class="question-text" id="q-text">Loading Data...</div>
+            
+            <!-- Dynamic Content Area -->
+            <div id="game-area"></div>
+        </div>
+        
+        <button class="btn btn-secondary" id="submit-btn" onclick="game.checkAnswer()">確認數據</button>
+    </div>
+
+    <!-- Screen 3: Results -->
+    <div id="screen-result" class="screen">
+        <h2>任務報告</h2>
+        <div class="score-display"><span id="final-score">0</span>%</div>
+        <p id="result-msg" style="margin-bottom: 2rem;">正在分析...</p>
+        <button class="btn" onclick="game.restart()">重啟系統</button>
+    </div>
+
+    <!-- Feedback Overlay -->
+    <div id="feedback-overlay" class="feedback-overlay">
+        <div class="feedback-content">
+            <h2 id="fb-title" class="feedback-title"></h2>
+            <p id="fb-text" class="feedback-text"></p>
+            <button class="btn" onclick="game.nextQuestion()">繼續</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Game Data: 10 Questions mixed types
+    // Types: 'choice' (Single Choice), 'sort' (Sentence Scramble), 'fill' (Fill in blank)
+    const questions = [
+        {
+            type: 'choice',
+            label: '選擇題',
+            text: '選出語氣最強烈的句子，表達「筆電非常輕」：',
+            content: {
+                options: [
+                    '現在的筆電很輕。',
+                    '現在的筆電有一點兒輕。',
+                    '現在的筆電可輕了，一隻手就拿得動。',
+                    '現在的筆電比以前輕。'
+                ]
+            },
+            answer: 2, // Index
+            explanation: "「可 + Vs + 了」表示強調程度非常高。這裡強調現在的筆電「非常」輕。"
+        },
+        {
+            type: 'fill',
+            label: '選詞填空',
+            text: '孔子_____偉大呢，他的思想影響了東方文化幾千年。',
+            content: {
+                hint: '(請填入強調語氣的詞)'
+            },
+            answer: ['可'],
+            explanation: "這裡需要一個強調詞，表示孔子的偉大程度很高。「可 + Vs」用於強調。"
+        },
+        {
+            type: 'sort',
+            label: '重組句子',
+            text: '請將詞彙重組為通順的句子 (強調聲音很大)：',
+            content: {
+                words: ['大呢', '聲音', '鞭炮', '可', '的']
+            },
+            answer: ['鞭炮', '的', '聲音', '可', '大呢'],
+            explanation: "正確語序：鞭炮的聲音(S) + 可(Adv) + 大呢(Vs)。"
+        },
+        {
+            type: 'choice',
+            label: '選擇題',
+            text: '關於「你可來了，我等你等得都快睡著了。」這句話的意思，下列何者正確？',
+            content: {
+                options: [
+                    '你可能不會來了。',
+                    '你終於來了 (帶有埋怨或期待已久的語氣)。',
+                    '你可以來，也可以不來。',
+                    '你來得很快。'
+                ]
+            },
+            answer: 1,
+            explanation: "「可 + V」在這種語境下，表示盼望已久的事情終於發生了，常含有「終於」的意思。"
+        },
+        {
+            type: 'choice',
+            label: '選擇題',
+            text: '選出正確的句子填空：\n那個納豆聞起來_____，我不敢吃。',
+            content: {
+                options: [
+                    '可臭了',
+                    '可臭',
+                    '很臭了',
+                    '真臭了'
+                ]
+            },
+            answer: 0,
+            explanation: "強調形容詞程度時，常用結構為「可 + Vs + 了」。"
+        },
+        {
+            type: 'sort',
+            label: '重組句子',
+            text: '請將詞彙重組 (強調學生的特質)：',
+            content: {
+                words: ['那', '有禮貌了', '學生', '可', '位']
+            },
+            answer: ['那', '位', '學生', '可', '有禮貌了'],
+            explanation: "正確語序：那位學生(S) + 可(Adv) + 有禮貌了(Vs)。"
+        },
+        {
+            type: 'fill',
+            label: '選詞填空',
+            text: '這次的世界文化日_____熱鬧了，連校長都親自參加了！',
+            content: {
+                hint: '(請填入強調語氣的詞)'
+            },
+            answer: ['可'],
+            explanation: "「可 + 熱鬧 + 了」強調場面非常熱鬧。"
+        },
+        {
+            type: 'sort',
+            label: '重組句子',
+            text: '請將詞彙重組 (強調年糕好吃)：',
+            content: {
+                words: ['可', '好吃了', '媽媽', '年糕', '做的']
+            },
+            answer: ['媽媽', '做的', '年糕', '可', '好吃了'],
+            explanation: "正確語序：媽媽做的年糕(S) + 可(Adv) + 好吃了(Vs)。"
+        },
+        {
+            type: 'choice',
+            label: '選擇題',
+            text: '兩小兒辯日時，孔子認為中午的太陽怎麼樣？\n句子：中午的太陽_____，感覺像火一樣。',
+            content: {
+                options: [
+                    '熱可熱',
+                    '可熱了',
+                    '可熱',
+                    '可不熱'
+                ]
+            },
+            answer: 1,
+            explanation: "「可熱了」是最自然且符合語法的強調用法。"
+        },
+        {
+            type: 'fill',
+            label: '選詞填空',
+            text: '平板電腦的這個新功能_____方便了，幫我解決了很多問題。',
+            content: {
+                hint: '(請填入強調語氣的詞)'
+            },
+            answer: ['可'],
+            explanation: "「可」用來強調「方便」的程度很高。"
+        }
+    ];
+
+    const game = {
+        state: {
+            currentIdx: 0,
+            score: 0,
+            userAnswer: null, // Stores index for choice, string for fill, array for sort
+            shuffledWords: [] // specific for sort type
+        },
+
+        init: function() {
+            this.updateHeader();
+        },
+
+        start: function() {
+            this.state.currentIdx = 0;
+            this.state.score = 0;
+            this.switchScreen('game');
+            this.renderQuestion();
+        },
+
+        restart: function() {
+            this.start();
+        },
+
+        switchScreen: function(screenName) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(`screen-${screenName}`).classList.add('active');
+        },
+
+        updateHeader: function() {
+            document.getElementById('q-num').innerText = `${String(this.state.currentIdx + 1).padStart(2, '0')}/10`;
+            document.getElementById('score').innerText = Math.round((this.state.score / 10) * 100);
+        },
+
+        renderQuestion: function() {
+            const q = questions[this.state.currentIdx];
+            const gameArea = document.getElementById('game-area');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            this.updateHeader();
+            document.getElementById('q-type').innerText = `DATA TYPE: [ ${q.label} ]`;
+            document.getElementById('q-text').innerText = q.text;
+            gameArea.innerHTML = '';
+            submitBtn.disabled = true; // Disable until interaction
+            submitBtn.style.opacity = '0.5';
+
+            this.state.userAnswer = null;
+
+            // Render based on type
+            if (q.type === 'choice') {
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+                q.content.options.forEach((opt, idx) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-btn';
+                    btn.innerText = `[${String.fromCharCode(65 + idx)}] ${opt}`;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        this.state.userAnswer = idx;
+                        this.enableSubmit();
+                    };
+                    grid.appendChild(btn);
+                });
+                gameArea.appendChild(grid);
+
+            } else if (q.type === 'fill') {
+                const wrapper = document.createElement('div');
+                wrapper.style.textAlign = 'center';
+                wrapper.style.marginTop = '2rem';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'fill-input';
+                input.placeholder = '?';
+                input.autocomplete = 'off';
+                
+                input.oninput = (e) => {
+                    this.state.userAnswer = e.target.value.trim();
+                    if(this.state.userAnswer.length > 0) this.enableSubmit();
+                    else this.disableSubmit();
+                };
+
+                wrapper.appendChild(input);
+                if(q.content.hint) {
+                    const hint = document.createElement('div');
+                    hint.innerText = q.content.hint;
+                    hint.style.color = '#888';
+                    hint.style.fontSize = '0.8rem';
+                    hint.style.marginTop = '10px';
+                    wrapper.appendChild(hint);
+                }
+                gameArea.appendChild(wrapper);
+
+            } else if (q.type === 'sort') {
+                // Shuffle words specifically for display
+                this.state.shuffledWords = [...q.content.words].sort(() => Math.random() - 0.5);
+                this.state.userAnswer = []; // Array of words
+
+                const sortContainer = document.createElement('div');
+                sortContainer.className = 'sort-container';
+
+                // Drop Zone (Answer area)
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.id = 'drop-zone';
+                
+                // Bank Zone
+                const bankZone = document.createElement('div');
+                bankZone.className = 'word-bank';
+                bankZone.id = 'bank-zone';
+
+                this.state.shuffledWords.forEach((word, idx) => {
+                    const chip = this.createWordChip(word, idx);
+                    bankZone.appendChild(chip);
+                });
+
+                sortContainer.appendChild(dropZone);
+                sortContainer.appendChild(bankZone);
+                gameArea.appendChild(sortContainer);
+            }
+        },
+
+        createWordChip: function(word, id) {
+            const chip = document.createElement('div');
+            chip.className = 'word-chip';
+            chip.innerText = word;
+            chip.dataset.word = word;
+            chip.dataset.id = id;
+            
+            chip.onclick = () => {
+                const dropZone = document.getElementById('drop-zone');
+                const bankZone = document.getElementById('bank-zone');
+                
+                if (chip.parentNode === bankZone) {
+                    // Move to Answer
+                    dropZone.appendChild(chip);
+                    this.state.userAnswer.push(word);
+                } else {
+                    // Move back to Bank
+                    bankZone.appendChild(chip);
+                    // Remove first instance of this word from answer array
+                    const index = this.state.userAnswer.indexOf(word);
+                    if (index > -1) {
+                        this.state.userAnswer.splice(index, 1);
+                    }
+                }
+                
+                if(this.state.userAnswer.length > 0) this.enableSubmit();
+                else this.disableSubmit();
+            };
+            return chip;
+        },
+
+        enableSubmit: function() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        },
+
+        disableSubmit: function() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        },
+
+        checkAnswer: function() {
+            const q = questions[this.state.currentIdx];
+            let isCorrect = false;
+
+            if (q.type === 'choice') {
+                isCorrect = (this.state.userAnswer === q.answer);
+            } else if (q.type === 'fill') {
+                // Allow "可" or "可是" (though grammar point is 可, sometimes students type more)
+                // Strict checking for this specific grammar point
+                isCorrect = q.answer.includes(this.state.userAnswer);
+            } else if (q.type === 'sort') {
+                isCorrect = (JSON.stringify(this.state.userAnswer) === JSON.stringify(q.answer));
+            }
+
+            this.showFeedback(isCorrect, q.explanation);
+            if(isCorrect) this.state.score++;
+        },
+
+        showFeedback: function(isCorrect, text) {
+            const overlay = document.getElementById('feedback-overlay');
+            const title = document.getElementById('fb-title');
+            const content = document.getElementById('fb-text');
+            
+            overlay.style.display = 'flex';
+            if (isCorrect) {
+                title.innerText = '系統同步成功';
+                title.className = 'feedback-title correct';
+                title.classList.add('glitch-effect');
+                content.innerText = 'Excellent! ' + text;
+            } else {
+                title.innerText = '數據連接失敗';
+                title.className = 'feedback-title wrong';
+                content.innerText = 'Correct Answer Required. \n\n' + text;
+            }
+        },
+
+        nextQuestion: function() {
+            document.getElementById('feedback-overlay').style.display = 'none';
+            document.getElementById('fb-title').classList.remove('glitch-effect');
+            
+            this.state.currentIdx++;
+            
+            if (this.state.currentIdx < questions.length) {
+                this.renderQuestion();
+            } else {
+                this.endGame();
+            }
+        },
+
+        endGame: function() {
+            this.switchScreen('result');
+            const finalScore = Math.round((this.state.score / 10) * 100);
+            document.getElementById('final-score').innerText = finalScore;
+            
+            let msg = '';
+            if (finalScore === 100) msg = '完美同步！你的語法核心運作正常。';
+            else if (finalScore >= 80) msg = '系統運行良好，僅有少量數據錯誤。';
+            else if (finalScore >= 60) msg = '系統勉強運行，建議重新校準語法模組。';
+            else msg = '警報：語法系統損壞嚴重，請立即重修。';
+            
+            document.getElementById('result-msg').innerText = msg;
+        }
+    };
+
+    // Initialize
+    game.init();
+
+</script>
+</body>
+</html>
